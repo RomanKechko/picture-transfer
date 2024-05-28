@@ -1,0 +1,46 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+#container {
+  height: 100vh;
+  background-color: #e42222;
+  display: flex;
+}
+
+.pole {
+  width: 900px;
+  height: 900px;
+  background-color: #fff;
+}
+
+.moving_container {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background-color: bisque;
+  display: flex;
+  transform: scale(1);
+  z-index: 1;
+  left: 1000px;
+}
+
+.card {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: aqua;
+  z-index: 2;
+}
+
+#card2 {
+  background-color: rgb(177, 177, 177);
+  z-index: 2;
+}
+
+#card3 {
+  background-color: rgb(115, 255, 0);
+  z-index: 2;
+}
