@@ -1,22 +1,55 @@
+const movingContainer = document.getElementById('moving_container')
+let isContainerScaled = false
+
+movingContainer.addEventListener('mousedown', function (event) {
+  if (event.target.classList.contains('card')) {
+    // Если цель клика - это карточка, прерываем выполнение функции
+    return
+  }
+
+  // Проверяем, не находится ли цель клика внутри карточки
+  isContainerScaled = !isContainerScaled // Инвертируем значение флага
+
+  if (isContainerScaled) {
+    movingContainer.style.transform = 'scale(1)'
+  } else {
+    movingContainer.style.transform = 'scale(0.1)'
+  }
+})
+
 class Card {
-  constructor (element) {
+  constructor (element, isClone = false) {
     this.element = element
+    this.isClone = isClone
     this.newX = 0
     this.newY = 0
     this.startX = 0
     this.startY = 0
-    this.parentRect = this.element.parentElement.getBoundingClientRect() // Получаем размеры родительского контейнера
     this.mouseMoveHandler = this.mouseMove.bind(this)
     this.mouseUpHandler = this.mouseUp.bind(this)
     this.element.addEventListener('mousedown', this.mouseDown.bind(this))
   }
 
   mouseDown (e) {
-    const rect = this.element.getBoundingClientRect()
-    const parentRect = this.element.parentElement.getBoundingClientRect() // Получаем размеры родительского контейнера
-    this.startX = e.clientX - rect.left + parentRect.left // Учитываем смещение родительского контейнера
-    this.startY = e.clientY - rect.top + parentRect.top // Учитываем смещение родительского контейнера
-    this.element.style.position = 'fixed'
+    if (!this.isClone) {
+      const rect = this.element.getBoundingClientRect()
+      this.startX = e.clientX - rect.left
+      this.startY = e.clientY - rect.top
+
+      this.duplicateCard = this.element.cloneNode(true) // Создаем дубликат карты
+      this.duplicateCard.style.position = 'fixed'
+      this.duplicateCard.style.top = rect.top + 'px'
+      this.duplicateCard.style.left = rect.left + 'px'
+      this.duplicateCard.style.width = rect.width + 'px' // Сохраняем ширину карты
+      this.duplicateCard.style.height = rect.height + 'px' // Сохраняем высоту карты
+      document.body.appendChild(this.duplicateCard) // Добавляем дубликат на страницу
+      new Card(this.duplicateCard, true) // Создаем новый экземпляр Card для дубликата
+    } else {
+      const rect = this.element.getBoundingClientRect()
+      this.startX = e.clientX - rect.left
+      this.startY = e.clientY - rect.top
+    }
+
     document.addEventListener('mousemove', this.mouseMoveHandler)
     document.addEventListener('mouseup', this.mouseUpHandler)
   }
@@ -32,26 +65,26 @@ class Card {
     document.removeEventListener('mousemove', this.mouseMoveHandler)
     document.removeEventListener('mouseup', this.mouseUpHandler)
 
-    const pole = document.getElementById('pole')
-    const movingContainer = document.getElementById('moving_container')
-    const poleRect = pole.getBoundingClientRect()
-    const cardRect = this.element.getBoundingClientRect()
+    if (this.isClone) {
+      const pole = document.getElementById('pole')
+      const poleRect = pole.getBoundingClientRect()
+      const cardRect = this.element.getBoundingClientRect()
 
-    if (
-      cardRect.left >= poleRect.left &&
-      cardRect.right <= poleRect.right &&
-      cardRect.top >= poleRect.top &&
-      cardRect.bottom <= poleRect.bottom
-    ) {
-      pole.appendChild(this.element) // Перемещаем карту в 'pole'
-    } else {
-      movingContainer.appendChild(this.element) // Перемещаем карту обратно в 'moving_container'
+      if (
+        cardRect.left >= poleRect.left &&
+        cardRect.right <= poleRect.right &&
+        cardRect.top >= poleRect.top &&
+        cardRect.bottom <= poleRect.bottom
+      ) {
+        pole.appendChild(this.element) // Добавляем карту в pole
+        // Обновляем позицию карты в pole
+        this.element.style.position = 'absolute'
+        this.element.style.top = cardRect.top - poleRect.top + 'px'
+        this.element.style.left = cardRect.left - poleRect.left + 'px'
+      } else {
+        this.element.remove() // Удаляем дубликат, если он не в pole
+      }
     }
-
-    const newParentRect = this.element.parentElement.getBoundingClientRect()
-    this.element.style.position = 'absolute'
-    this.element.style.top = cardRect.top - newParentRect.top + 'px'
-    this.element.style.left = cardRect.left - newParentRect.left + 'px'
   }
 }
 

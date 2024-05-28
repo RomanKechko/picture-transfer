@@ -21,7 +21,7 @@ body {
   height: 600px;
   background-color: bisque;
   display: flex;
-  transform: scale(1);
+  transform: scale(0.1);
   z-index: 1;
   left: 1000px;
 }
