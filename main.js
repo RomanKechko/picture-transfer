@@ -1,19 +1,16 @@
 const movingContainer = document.getElementById('moving_container')
 let isContainerScaled = false
 
-movingContainer.addEventListener('mousedown', function (event) {
-  if (event.target.classList.contains('card')) {
-    // Если цель клика - это карточка, прерываем выполнение функции
-    return
-  }
+movingContainer.addEventListener('click', function (event) {
+  if (!event.target.classList.contains('card')) {
+    // Проверяем, не находится ли цель клика внутри карточки
+    isContainerScaled = !isContainerScaled // Инвертируем значение флага
 
-  // Проверяем, не находится ли цель клика внутри карточки
-  isContainerScaled = !isContainerScaled // Инвертируем значение флага
-
-  if (isContainerScaled) {
-    movingContainer.style.transform = 'scale(1)'
-  } else {
-    movingContainer.style.transform = 'scale(0.1)'
+    if (isContainerScaled) {
+      movingContainer.style.transform = 'scale(1)'
+    } else {
+      movingContainer.style.transform = 'scale(0.1)'
+    }
   }
 })
 
@@ -28,13 +25,22 @@ class Card {
     this.mouseMoveHandler = this.mouseMove.bind(this)
     this.mouseUpHandler = this.mouseUp.bind(this)
     this.element.addEventListener('mousedown', this.mouseDown.bind(this))
+
+    document.addEventListener('mousemove', this.mouseMoveHandler)
+    document.addEventListener('mouseup', this.mouseUpHandler)
   }
 
   mouseDown (e) {
+    e.preventDefault() // Предотвращаем стандартное поведение браузера для события mousedown
+    e.stopPropagation() // Предотвращаем всплытие события mousedown
+
+    const rect = this.element.getBoundingClientRect()
+    const offsetX = e.clientX - rect.left
+    const offsetY = e.clientY - rect.top
+
     if (!this.isClone) {
-      const rect = this.element.getBoundingClientRect()
-      this.startX = e.clientX - rect.left
-      this.startY = e.clientY - rect.top
+      this.startX = offsetX
+      this.startY = offsetY
 
       this.duplicateCard = this.element.cloneNode(true) // Создаем дубликат карты
       this.duplicateCard.style.position = 'fixed'
@@ -45,9 +51,8 @@ class Card {
       document.body.appendChild(this.duplicateCard) // Добавляем дубликат на страницу
       new Card(this.duplicateCard, true) // Создаем новый экземпляр Card для дубликата
     } else {
-      const rect = this.element.getBoundingClientRect()
-      this.startX = e.clientX - rect.left
-      this.startY = e.clientY - rect.top
+      this.startX = offsetX
+      this.startY = offsetY
     }
 
     document.addEventListener('mousemove', this.mouseMoveHandler)
