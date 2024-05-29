@@ -51,8 +51,8 @@ class Card {
       document.body.appendChild(this.duplicateCard) // Добавляем дубликат на страницу
       new Card(this.duplicateCard, true) // Создаем новый экземпляр Card для дубликата
     } else {
-      this.startX = offsetX
-      this.startY = offsetY
+      this.startX = e.clientX - rect.left // Используем абсолютные координаты клика относительно окна
+      this.startY = e.clientY - rect.top // Используем абсолютные координаты клика относительно окна
     }
 
     document.addEventListener('mousemove', this.mouseMoveHandler)
