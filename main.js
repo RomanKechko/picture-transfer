@@ -1,18 +1,31 @@
-// main.js
-const movingContainer = document.getElementById('moving_container')
+const movingContainers = document.querySelectorAll('.moving_container')
 let isContainerScaled = false
 
-movingContainer.addEventListener('click', function (event) {
-  if (!event.target.classList.contains('card')) {
-    // Проверяем, не находится ли цель клика внутри карточки
-    isContainerScaled = !isContainerScaled // Инвертируем значение флага
+movingContainers.forEach(movingContainer => {
+  movingContainer.addEventListener('click', function (event) {
+    if (!event.target.classList.contains('card')) {
+      isContainerScaled = !isContainerScaled // Инвертируем значение флага
 
-    if (isContainerScaled) {
-      movingContainer.style.transform = 'scale(1)'
-    } else {
-      movingContainer.style.transform = 'scale(0.1)'
+      if (isContainerScaled) {
+        if (event.target.id === 'moving_container1') {
+          movingContainer.style.transform = 'scale(1) translate(-72px, 150px)'
+          movingContainer.style.zIndex = 2
+        } else if (event.target.id === 'moving_container2') {
+          movingContainer.style.transform = 'scale(1) translate(-72px, 100px)'
+          movingContainer.style.zIndex = 2
+        } else if (event.target.id === 'moving_container3') {
+          movingContainer.style.transform = 'scale(1) translate(-72px, -100px)'
+          movingContainer.style.zIndex = 2
+        } else if (event.target.id === 'moving_container4') {
+          movingContainer.style.transform = 'scale(1) translate(-72px, -200px)'
+          movingContainer.style.zIndex = 2
+        }
+      } else {
+        movingContainer.style.transform = 'scale(0.1)'
+        movingContainer.style.zIndex = 1
+      }
     }
-  }
+  })
 })
 
 class Card {
@@ -25,20 +38,21 @@ class Card {
     this.startY = 0
     this.mouseMoveHandler = this.mouseMove.bind(this)
     this.mouseUpHandler = this.mouseUp.bind(this)
-    this.element.addEventListener('mousedown', this.mouseDown.bind(this))
+    this.mouseDownHandler = this.mouseDown.bind(this)
+    this.element.addEventListener('mousedown', this.mouseDownHandler)
   }
 
   mouseDown (e) {
-    e.preventDefault() // Предотвращаем стандартное поведение браузера для события mousedown
-    e.stopPropagation() // Предотвращаем всплытие события mousedown
+    e.preventDefault()
+    e.stopPropagation()
 
     const rect = this.element.getBoundingClientRect()
     const offsetX = e.clientX - rect.left
     const offsetY = e.clientY - rect.top
 
     if (!this.isClone) {
-      this.startX = e.clientX
-      this.startY = e.clientY
+      this.startX = offsetX
+      this.startY = offsetY
 
       this.duplicateCard = this.element.cloneNode(true) // Создаем дубликат карты
       this.duplicateCard.style.position = 'fixed'
@@ -47,24 +61,20 @@ class Card {
       this.duplicateCard.style.width = rect.width + 'px' // Сохраняем ширину карты
       this.duplicateCard.style.height = rect.height + 'px' // Сохраняем высоту карты
       document.body.appendChild(this.duplicateCard) // Добавляем дубликат на страницу
+      new Card(this.duplicateCard, true) // Создаем новый экземпляр Card для дубликата
 
-      // Создаем новый экземпляр Card для дубликата и передаем начальные координаты
-      const duplicateCardInstance = new Card(this.duplicateCard, true)
-      duplicateCardInstance.startX = this.startX - rect.left
-      duplicateCardInstance.startY = this.startY - rect.top
-
-      // Передаем обработчики события перемещения и отпускания мыши новому экземпляру
-      document.addEventListener(
-        'mousemove',
-        duplicateCardInstance.mouseMoveHandler
+      this.duplicateCard.dispatchEvent(
+        new MouseEvent('mousedown', {
+          clientX: e.clientX,
+          clientY: e.clientY,
+          bubbles: true,
+          cancelable: true,
+          view: window
+        })
       )
-      document.addEventListener('mouseup', duplicateCardInstance.mouseUpHandler)
-
-      // Начинаем перемещение дубликата сразу
-      duplicateCardInstance.mouseMove(e)
     } else {
-      this.startX = e.clientX - rect.left
-      this.startY = e.clientY - rect.top
+      this.startX = offsetX
+      this.startY = offsetY
 
       document.addEventListener('mousemove', this.mouseMoveHandler)
       document.addEventListener('mouseup', this.mouseUpHandler)
