@@ -1,3 +1,4 @@
+// main.js
 const movingContainer = document.getElementById('moving_container')
 let isContainerScaled = false
 
@@ -25,9 +26,6 @@ class Card {
     this.mouseMoveHandler = this.mouseMove.bind(this)
     this.mouseUpHandler = this.mouseUp.bind(this)
     this.element.addEventListener('mousedown', this.mouseDown.bind(this))
-
-    document.addEventListener('mousemove', this.mouseMoveHandler)
-    document.addEventListener('mouseup', this.mouseUpHandler)
   }
 
   mouseDown (e) {
@@ -39,8 +37,8 @@ class Card {
     const offsetY = e.clientY - rect.top
 
     if (!this.isClone) {
-      this.startX = offsetX
-      this.startY = offsetY
+      this.startX = e.clientX
+      this.startY = e.clientY
 
       this.duplicateCard = this.element.cloneNode(true) // Создаем дубликат карты
       this.duplicateCard.style.position = 'fixed'
@@ -49,14 +47,28 @@ class Card {
       this.duplicateCard.style.width = rect.width + 'px' // Сохраняем ширину карты
       this.duplicateCard.style.height = rect.height + 'px' // Сохраняем высоту карты
       document.body.appendChild(this.duplicateCard) // Добавляем дубликат на страницу
-      new Card(this.duplicateCard, true) // Создаем новый экземпляр Card для дубликата
-    } else {
-      this.startX = e.clientX - rect.left // Используем абсолютные координаты клика относительно окна
-      this.startY = e.clientY - rect.top // Используем абсолютные координаты клика относительно окна
-    }
 
-    document.addEventListener('mousemove', this.mouseMoveHandler)
-    document.addEventListener('mouseup', this.mouseUpHandler)
+      // Создаем новый экземпляр Card для дубликата и передаем начальные координаты
+      const duplicateCardInstance = new Card(this.duplicateCard, true)
+      duplicateCardInstance.startX = this.startX - rect.left
+      duplicateCardInstance.startY = this.startY - rect.top
+
+      // Передаем обработчики события перемещения и отпускания мыши новому экземпляру
+      document.addEventListener(
+        'mousemove',
+        duplicateCardInstance.mouseMoveHandler
+      )
+      document.addEventListener('mouseup', duplicateCardInstance.mouseUpHandler)
+
+      // Начинаем перемещение дубликата сразу
+      duplicateCardInstance.mouseMove(e)
+    } else {
+      this.startX = e.clientX - rect.left
+      this.startY = e.clientY - rect.top
+
+      document.addEventListener('mousemove', this.mouseMoveHandler)
+      document.addEventListener('mouseup', this.mouseUpHandler)
+    }
   }
 
   mouseMove (e) {
