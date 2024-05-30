@@ -7,16 +7,16 @@ movingContainers.forEach(movingContainer => {
       isContainerScaled = !isContainerScaled // Инвертируем значение флага
 
       if (isContainerScaled) {
-        if (event.target.id === 'moving_container1') {
+        if (movingContainer.id === 'moving_container1') {
           movingContainer.style.transform = 'scale(1) translate(-72px, 150px)'
           movingContainer.style.zIndex = 2
-        } else if (event.target.id === 'moving_container2') {
+        } else if (movingContainer.id === 'moving_container2') {
           movingContainer.style.transform = 'scale(1) translate(-72px, 100px)'
           movingContainer.style.zIndex = 2
-        } else if (event.target.id === 'moving_container3') {
+        } else if (movingContainer.id === 'moving_container3') {
           movingContainer.style.transform = 'scale(1) translate(-72px, -100px)'
           movingContainer.style.zIndex = 2
-        } else if (event.target.id === 'moving_container4') {
+        } else if (movingContainer.id === 'moving_container4') {
           movingContainer.style.transform = 'scale(1) translate(-72px, -200px)'
           movingContainer.style.zIndex = 2
         }
@@ -29,8 +29,9 @@ movingContainers.forEach(movingContainer => {
 })
 
 class Card {
-  constructor (element, isClone = false) {
+  constructor (element, movingContainer, isClone = false) {
     this.element = element
+    this.movingContainer = movingContainer
     this.isClone = isClone
     this.newX = 0
     this.newY = 0
@@ -43,6 +44,11 @@ class Card {
   }
 
   mouseDown (e) {
+    // Проверяем масштаб контейнера
+    if (!this.movingContainer.style.transform.includes('scale(1)')) {
+      return
+    }
+
     e.preventDefault()
     e.stopPropagation()
 
@@ -61,7 +67,7 @@ class Card {
       this.duplicateCard.style.width = rect.width + 'px' // Сохраняем ширину карты
       this.duplicateCard.style.height = rect.height + 'px' // Сохраняем высоту карты
       document.body.appendChild(this.duplicateCard) // Добавляем дубликат на страницу
-      new Card(this.duplicateCard, true) // Создаем новый экземпляр Card для дубликата
+      new Card(this.duplicateCard, this.movingContainer, true) // Создаем новый экземпляр Card для дубликата
 
       this.duplicateCard.dispatchEvent(
         new MouseEvent('mousedown', {
@@ -115,7 +121,10 @@ class Card {
   }
 }
 
-const cards = document.querySelectorAll('.card')
-cards.forEach(card => {
-  new Card(card)
+// Инициализация всех карточек при загрузке страницы
+movingContainers.forEach(movingContainer => {
+  const cards = movingContainer.querySelectorAll('.card')
+  cards.forEach(card => {
+    new Card(card, movingContainer)
+  })
 })

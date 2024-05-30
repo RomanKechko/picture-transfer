@@ -42,8 +42,10 @@ body {
   height: 600px;
   background-color: bisque;
   display: flex;
+  flex-wrap: wrap;
   transform: scale(0.1);
   z-index: 1;
+  align-content: flex-start;
 }
 .moving_container:hover {
   cursor: pointer;
@@ -119,5 +121,13 @@ body {
 #card3-3,
 #card4-3 {
   background-color: rgb(115, 255, 0);
+  z-index: 2;
+}
+
+#card1-4,
+#card2-4,
+#card3-4,
+#card4-4 {
+  background-color: rgb(255, 174, 0);
   z-index: 2;
 }
