@@ -44,8 +44,11 @@ class Card {
   }
 
   mouseDown (e) {
-    // Проверяем масштаб контейнера
-    if (!this.movingContainer.style.transform.includes('scale(1)')) {
+    // Проверяем масштаб контейнера и местоположение карточки
+    if (
+      !this.movingContainer.style.transform.includes('scale(1)') &&
+      this.element.parentElement.id !== 'pole'
+    ) {
       return
     }
 
